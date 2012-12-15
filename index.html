@@ -1,4 +1,5 @@
 
+
 <!DOCTYPE html>
 <html>
   <head>
@@ -21,63 +22,68 @@
         bottom: 0;
       }
     </style>
-	 <script src="scripts/jquery-1.7.1.min.js"></script>
+     <script src="scripts/jquery-1.7.1.min.js"></script>
     <script type="text/javascript" src="scripts/monocle/monocore.js"></script>
 	
-	<script type="text/javascript" src="scripts/js-epub/js-unzip.js"></script>
-	<script type="text/javascript" src="scripts/js-epub/js-inflate.js"></script>
-	<script type="text/javascript" src="scripts/js-epub/js-epub.min.js"></script>
+	<script type="text/javascript" src="scripts/zip/jszip.js"></script>
+    <script type="text/javascript" src="scripts/zip/jszip-load.js"></script>
+    <script type="text/javascript" src="scripts/zip/jszip-deflate.js"></script>
+    <script type="text/javascript" src="scripts/zip/jszip-inflate.js"></script>
 	
+    <script type="text/javascript" src="scripts/quietthyme.monocle.bookdata/quietthyme.monocle.epub.js"></script>
+    
     <script type="text/javascript">
 	$(function(){
 	
-		jQuery.get("dragon.epub", function (data) {
-			//var decodedData = someBase64DecoderHere(data); // Find a base64 decoder on google or whatever. 
-			//var epubFile = ...; // Use HTML5 files or download via XHR.
-			
-			var epub = new JSEpub(data);
-
-			var showFirstPage = function () {
-			// The spine lists all pages in correct order
-			var spine = epub.opf.spine[0];
-
-			// The manifest contains the href of the file
-			var href = epub.opf.manifest[spine]["href"];
-
-			// All the files are stored in here, indexed by href
-			var doc = epub.files[href];
-
-			// The doc is a DOMparser created DOM. You may want to
-			// work with a string version of the page contents.
-			var html = new XMLSerializer().serializeToString(doc);
-			
-			// Use "html" to your hearts content!
-			}
-
-// Each time something happens in the processing, the callbakc is called. The
-// step is a number, representing the actual step that was performed. You
-// can use this to render status messages to the user as you process the file.
-// The processor will also insert a tiny delay between each operation, so that
-// you don't get the browser slow script warnings.
-epub.processInSteps(function (step, extras) {
-    var msg;
-
-    if (step === 1) {
-        msg = "Unzipping";
-    } else if (step === 2) {
-        msg = "Uncompressing " + extras;
-    } else if (step === 3) {
-        msg = "Reading OPF";
-    } else if (step === 4) {
-        msg = "Post processing";
-    } else if (step === 5) {
-        msg = "Finishing";
-        showFirstPage();
-    }
-
-    // Render the "msg" here.
-});
-		});
+    QT.bookdata.init("dragon.epub");
+//		jQuery.get("dragon.epub", function (data) {
+//			//var decodedData = someBase64DecoderHere(data); // Find a base64 decoder on google or whatever. 
+//			//var epubFile = ...; // Use HTML5 files or download via XHR.
+//			
+//			var epub = new JSEpub(data);
+//
+//			var showFirstPage = function () {
+//			// The spine lists all pages in correct order
+//			var spine = epub.opf.spine[0];
+//            console.log('spine', spine);
+//			// The manifest contains the href of the file
+//			var href = epub.opf.manifest[spine]["href"];
+//            console.log('href', href);
+//			// All the files are stored in here, indexed by href
+//			var doc = epub.files[href];
+//            console.log('doc', doc);
+//			// The doc is a DOMparser created DOM. You may want to
+//			// work with a string version of the page contents.
+//			var html = new XMLSerializer().serializeToString(doc);
+//			console.log('html', html);
+//            
+//			// Use "html" to your hearts content!
+//			}
+//
+//// Each time something happens in the processing, the callbakc is called. The
+//// step is a number, representing the actual step that was performed. You
+//// can use this to render status messages to the user as you process the file.
+//// The processor will also insert a tiny delay between each operation, so that
+//// you don't get the browser slow script warnings.
+//epub.processInSteps(function (step, extras) {
+//    var msg;
+//
+//    if (step === 1) {
+//        msg = "Unzipping";
+//    } else if (step === 2) {
+//        msg = "Uncompressing " + extras;
+//    } else if (step === 3) {
+//        msg = "Reading OPF";
+//    } else if (step === 4) {
+//        msg = "Post processing";
+//    } else if (step === 5) {
+//        msg = "Finishing";
+//        showFirstPage();
+//    }
+//
+//    // Render the "msg" here.
+//});
+//		});
 	})
 	
 	
@@ -223,7 +229,7 @@ epub.processInSteps(function (step, extras) {
       That night, and for many nights after, the Velveteen Rabbit slept in the Boy&#8217;s bed.  At first he found it rather uncomfortable, for the Boy hugged him very tight, and sometimes he rolled over on him, and sometimes he pushed him so far under the pillow that the Rabbit could scarcely breathe.  And he missed, too, those long moonlight hours in the nursery, when all the house was silent, and his talks with the Skin Horse.  But very soon he grew to like it, for the Boy used to talk to him, and made nice tunnels for him under the bedclothes that he said were like the burrows the real rabbits lived in.  And they had splendid games together, in whispers, when Nana had gone away to her supper and left the night-light burning on the mantelpiece.  And when the Boy dropped off to sleep, the Rabbit would snuggle down close under his little warm chin and dream, with the Boy&#8217;s hands clasped close round him all night long.
       </p>
       <p>
-      And so time went on, and the little Rabbit was very happy–so happy that he never noticed how his beautiful velveteen fur was getting shabbier and shabbier, and his tail becoming unsewn, and all the pink rubbed off his nose where the Boy had kissed him.
+      And so time went on, and the little Rabbit was very happyï¿½so happy that he never noticed how his beautiful velveteen fur was getting shabbier and shabbier, and his tail becoming unsewn, and all the pink rubbed off his nose where the Boy had kissed him.
       </p>
       <p>
       Spring came, and they had long days in the garden, for wherever the Boy went the Rabbit went too.  He had rides in the wheelbarrow, and picnics on the grass, and lovely fairy huts built for him under the raspberry canes behind the flower border.  And once, when the Boy was called away suddenly to go out to tea, the Rabbit was left out on the lawn until long after dusk, and Nana had to come and look for him with the candle because the Boy couldn&#8217;t go to sleep unless he was there.  He was wet through with the dew and quite earthy from diving into the burrows the Boy had made for him in the flower bed, and Nana grumbled as she rubbed him off with a corner of her apron.
@@ -363,7 +369,7 @@ epub.processInSteps(function (step, extras) {
       &#8220;How about his old Bunny?&#8221; she asked.
       </p>
       <p>
-      &#8221;<i>That?</i>&#8221; said the doctor.  &#8220;Why, it&#8217;s a mass of scarlet fever germs!–Burn it at once.  What?  Nonsense!  Get him a new one.  He mustn&#8217;t have that any more!&#8221;
+      &#8221;<i>That?</i>&#8221; said the doctor.  &#8220;Why, it&#8217;s a mass of scarlet fever germs!ï¿½Burn it at once.  What?  Nonsense!  Get him a new one.  He mustn&#8217;t have that any more!&#8221;
       </p>
 
       <p class="center">
@@ -378,7 +384,7 @@ epub.processInSteps(function (step, extras) {
       That night the Boy slept in a different bedroom, and he had a new bunny to sleep with him.  It was a splendid bunny, all white plush with real glass eyes, but the Boy was too excited to care very much about it.  For to-morrow he was going to the seaside, and that in itself was such a wonderful thing that he could think of nothing else.
       </p>
       <p>
-      And while the Boy was asleep, dreaming of the seaside, the little Rabbit lay among the old picture-books in the corner behind the fowl-house, and he felt very lonely.  The sack had been left untied, and so by wriggling a bit he was able to get his head through the opening and look out.  He was shivering a little, for he had always been used to sleeping in a proper bed, and by this time his coat had worn so thin and threadbare from hugging that it was no longer any protection to him.  Near by he could see the thicket of raspberry canes, growing tall and close like a tropical jungle, in whose shadow he had played with the Boy on bygone mornings.  He thought of those long sunlit hours in the garden–how happy they were–and a great sadness came over him.  He seemed to see them all pass before him, each more beautiful than the other, the fairy huts in the flower-bed, the quiet evenings in the wood when he lay in the bracken and the little ants ran over his paws; the wonderful day when he first knew that he was Real.  He thought of the Skin Horse, so wise and gentle, and all that he had told him.  Of what use was it to be loved and lose one&#8217;s beauty and become Real if it all ended like this?  And a tear, a real tear, trickled down his little shabby velvet nose and fell to the ground.
+      And while the Boy was asleep, dreaming of the seaside, the little Rabbit lay among the old picture-books in the corner behind the fowl-house, and he felt very lonely.  The sack had been left untied, and so by wriggling a bit he was able to get his head through the opening and look out.  He was shivering a little, for he had always been used to sleeping in a proper bed, and by this time his coat had worn so thin and threadbare from hugging that it was no longer any protection to him.  Near by he could see the thicket of raspberry canes, growing tall and close like a tropical jungle, in whose shadow he had played with the Boy on bygone mornings.  He thought of those long sunlit hours in the gardenï¿½how happy they wereï¿½and a great sadness came over him.  He seemed to see them all pass before him, each more beautiful than the other, the fairy huts in the flower-bed, the quiet evenings in the wood when he lay in the bracken and the little ants ran over his paws; the wonderful day when he first knew that he was Real.  He thought of the Skin Horse, so wise and gentle, and all that he had told him.  Of what use was it to be loved and lose one&#8217;s beauty and become Real if it all ended like this?  And a tear, a real tear, trickled down his little shabby velvet nose and fell to the ground.
       </p>
       <p>
       And then a strange thing happened.  For where the tear had fallen a flower grew out of the ground, a mysterious flower, not at all like any that grew in the garden.  It had slender green leaves the colour of emeralds, and in the centre of the leaves a blossom like a golden cup.  It was so beautiful that the little Rabbit forgot to cry, and just lay there watching it.  And presently the blossom opened, and out of it there stepped a fairy.
