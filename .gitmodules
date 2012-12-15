@@ -1,0 +1,6 @@
+[submodule "lib/js-epub"]
+	path = lib/js-epub
+	url = git://github.com/augustl/js-epub.git
+[submodule "lib/monocle"]
+	path = lib/monocle
+	url = git@github.com:AnalogJ/Monocle.git
