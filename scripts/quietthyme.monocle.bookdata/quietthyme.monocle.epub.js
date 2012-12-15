@@ -7,7 +7,10 @@ QT.bookdata = (function(qt){
     //////////////////////////////////////////////////////////////////////////
     // Private Data
     //////////////////////////////////////////////////////////////////////////
-    var EVENT_LOADING = 'EVENT_LOADING';
+    var EVENT ={};
+    EVENT.LOADING = 'EVENT_LOADING';
+    EVENT.BOOKDATA_READY = 'EVENT_BOOKDATA_READY';
+    
     
     var MSG = {};
     MSG.LOADING_FILE = 'Loading file from url';
@@ -16,6 +19,7 @@ QT.bookdata = (function(qt){
     MSG.READING_OPF = 'Reading OPF';
     MSG.POST_PROCESSING = 'Post processing';
     MSG.FINISHED = 'Finished!';
+    MSG.FINISHED_POST_PROCESSING = 'FINISHED_POST_PROCESSING';
     
     MSG.ERR_NOT_ZIP = 'File is not a proper Zip file';
     MSG.ERR_BLANK_URL = 'Zip url cannot be blank';
@@ -82,28 +86,29 @@ QT.bookdata = (function(qt){
      * @param {data} data contained inside the epub file.
      */
     function unzipBlob(data) {
-        try{
-            publish(EVENT_LOADING, STATE.OK,MSG.UNZIPPING);
+        //try{
+            publish(EVENT.LOADING, STATE.OK,MSG.UNZIPPING);
             _unzipper = new JSZip();
             _unzipper.load(data, {
                 base64 : false
             });
             
             console.log(_unzipper);
-            console.log(_unzipper.files);
+            console.log(_unzipper.files, typeof(_unzipper.files));
             _compressedFiles= _unzipper.files;
             uncompressNextCompressedFile()
             
-        }
-        catch(ex){
-            publish(EVENT_LOADING, STATE.ERR,MSG.ERR_NOT_ZIP);
-        }
+        //}
+        //catch(ex){
+            console.log(ex);
+            publish(EVENT.LOADING, STATE.ERR,MSG.ERR_NOT_ZIP);
+        //}
 	}
     
     function uncompressNextCompressedFile() {
         var compressedFile = _compressedFiles.shift();
         if (compressedFile) {
-            publish(EVENT_LOADING, STATE.OK, MSG.UNCOMPRESSING + compressedFile.name);
+            publish(EVENT.LOADING, STATE.OK, MSG.UNCOMPRESSING + compressedFile.name);
             uncompressFile(compressedFile);
             withTimeout(uncompressNextCompressedFile);
         } else {
@@ -120,14 +125,14 @@ QT.bookdata = (function(qt){
     };
 
     function didUncompressAllFiles() {
-            publish(EVENT_LOADING, STATE.OK, MSG.READING_OPF);
+            publish(EVENT.LOADING, STATE.OK, MSG.READING_OPF);
             _opfPath = getOpfPathFromContainer();
             readOpf(_files[_opfPath]);
 
-            publish(EVENT_LOADING, STATE.OK, MSG.POST_PROCESSING);
+            publish(EVENT.LOADING, STATE.OK, MSG.POST_PROCESSING);
             postProcess();
-            publish(EVENT_LOADING, STATE.OK, MSG.FINISHED);
-        },
+            publish(EVENT.LOADING, STATE.OK, MSG.FINISHED);
+    }
 
     function uncompressFile(compressedFile) {
         var data = compressedFile.data;
@@ -253,6 +258,9 @@ QT.bookdata = (function(qt){
                 _files[href] = result;
             }
         }
+        publish(EVENT.LOADING,STATE.OK,MSG.FINISHED_POST_PROCESSING);
+        publish(EVENT.BOOKDATA_READY, this);
+        console.log(this);
     }
     
     
@@ -349,12 +357,12 @@ QT.bookdata = (function(qt){
     var init = function(url, options){
         
         if(url){
-            publish(EVENT_LOADING, STATE.OK,MSG.LOADING_FILE);
+            publish(EVENT.LOADING, STATE.OK,MSG.LOADING_FILE);
             getBinaryFile(url,unzipBlob);
             
         }
         else{
-            publish(EVENT_LOADING, STATE.ERR,MSG.ERR_BLANK_URL);
+            publish(EVENT.LOADING, STATE.ERR,MSG.ERR_BLANK_URL);
         }
         
         
@@ -391,7 +399,16 @@ QT.bookdata = (function(qt){
     }
     
     return {
-        init : init,
+        init :  init,
+        events : function(){return EVENT;},
+        
+        unzipper:           function(){return _unzipper;},
+        compressedFiles:    function(){return _compressedFiles;},
+        files:              function(){return _files;},
+        opfPath:            function(){return _opfPath;},
+        container:          function(){return _container;},
+        mimetype:           function(){return _mimetype;},
+        opf:                function(){return _opf;},
         
         /*Monocle Book Data Interface Methods*/
         getComponents : getComponents,

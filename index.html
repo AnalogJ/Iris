@@ -35,6 +35,14 @@
     <script type="text/javascript">
 	$(function(){
 	
+   $(window).bind(QT.bookdata.events.BOOKDATA_READY, function(event, param1) {
+        console.log(param1);
+    });
+
+    $(window).bind(QT.bookdata.events.LOADING, function(event, state, message) {
+        console.log(state,message);
+    });
+    
     QT.bookdata.init("dragon.epub");
 //		jQuery.get("dragon.epub", function (data) {
 //			//var decodedData = someBase64DecoderHere(data); // Find a base64 decoder on google or whatever. 
