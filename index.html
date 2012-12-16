@@ -35,12 +35,12 @@
     <script type="text/javascript">
 	$(function(){
 	
-   $(window).bind(QT.bookdata.events.BOOKDATA_READY, function(event, param1) {
+   $(window).bind(QT.bookdata.events().BOOKDATA_READY, function(event, param1) {
         console.log(param1);
     });
 
-    $(window).bind(QT.bookdata.events.LOADING, function(event, state, message) {
-        console.log(state,message);
+    $(window).bind(QT.bookdata.events().LOADING, function(event, arr) {
+        console.log(arr[0],arr[1]);
     });
     
     QT.bookdata.init("dragon.epub");

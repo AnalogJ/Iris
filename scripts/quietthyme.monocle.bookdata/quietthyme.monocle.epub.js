@@ -95,12 +95,20 @@ QT.bookdata = (function(qt){
             
             console.log(_unzipper);
             console.log(_unzipper.files, typeof(_unzipper.files));
-            _compressedFiles= _unzipper.files;
+            
+            _compressedFiles=[];
+            for(var key in _unzipper.files){
+                var item = _unzipper.files[key];
+                if(item){
+                    _compressedFiles.push(item);
+                }
+            }
+            
             uncompressNextCompressedFile()
             
         //}
         //catch(ex){
-            console.log(ex);
+            //console.log(ex);
             publish(EVENT.LOADING, STATE.ERR,MSG.ERR_NOT_ZIP);
         //}
 	}
@@ -409,6 +417,7 @@ QT.bookdata = (function(qt){
         container:          function(){return _container;},
         mimetype:           function(){return _mimetype;},
         opf:                function(){return _opf;},
+        publish:    publish,
         
         /*Monocle Book Data Interface Methods*/
         getComponents : getComponents,
