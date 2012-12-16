@@ -324,7 +324,7 @@ QT.bookdata = (function(qt){
         var navPointChildren = navPointElement.childNodes;
         
         var link = navPointElement.getElementsByTagName("content")[0].getAttribute("src");
-        var title = navPointElement.getElementsByTagName("text")[0].text;
+        var title = navPointElement.getElementsByTagName("navLabel")[0].getElementsByTagName("text")[0].textContent;
         
         var tocItem = new TocItem(title,link);
         
@@ -346,7 +346,7 @@ QT.bookdata = (function(qt){
             if(childElement.nodeName.toLowerCase() == "a" || childElement.nodeName.toLowerCase() == "span"){
                 
                 var link = childElement.getAttribute("href");
-                var title = childElement.text;
+                var title = childElement.value;
                 
                 tocItem.title =title;
                 tocItem.src = link;
