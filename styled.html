@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html>
+    
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+        />
+        <title>The Velveteen Rabbit - Monocle</title>
+        <link rel="stylesheet" type="text/css" href="css/monocle/monocore.css" />
+        <link rel="stylesheet" type="text/css" href="css/monocle/monoctrl.css"/>
+        <link rel="stylesheet" type="text/css" href="css/quietthyme.monocle/quietthyme.monocle.controls.css"/>
+        <style type="text/css">
+            #rabbit {
+                position: absolute;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+            }
+        </style>
+        <script src="scripts/jquery-1.7.1.min.js"></script>
+        <script type="text/javascript" src="scripts/monocle/monocore.js"></script>
+        <script type="text/javascript" src="scripts/monocle/monoctrl.js"></script>
+        <script type="text/javascript" src="scripts/zip/jszip.js"></script>
+        <script type="text/javascript" src="scripts/zip/jszip-load.js"></script>
+        <script type="text/javascript" src="scripts/zip/jszip-deflate.js"></script>
+        <script type="text/javascript" src="scripts/zip/jszip-inflate.js"></script>
+        <script type="text/javascript" src="scripts/quietthyme.monocle/quietthyme.monocle.controls.js"></script>
+        <script type="text/javascript" src="scripts/quietthyme.monocle/quietthyme.monocle.epub.js"></script>
+        <script type="text/javascript">
+            $(function() {
+
+                $(window).bind(QT.bookdata.events().BOOKDATA_READY, function(event, param1) {
+                    console.log('READY:' + param1);
+                    Monocle.DEBUG = true;
+
+
+                    var bkTitle = QT.bookdata.getMetaData('title');
+                    window.placeSaver = new Monocle.Controls.PlaceSaver(bkTitle);
+                    var options = {
+                        place: placeSaver.savedPlace(),
+                        stylesheet: 'body { font-family: Helvetica Neue, Helvetica, sans-serif; font-size: 85%; line-height: 130%; } p.divider { text-align: center; font-size: 150%; margin: 1em 0; } .cover h1 { font-size: 2.5em; line-height: 1.4em; } .cover h2 { font-weight: normal; }'
+                    };
+
+                        function prep(rdr) {
+                            rdr.addControl(placeSaver, 'invisible');
+                            controlSpinner(rdr);
+                            controlTitle(rdr);
+                            controlContents(rdr);
+                            controlPageNumber(rdr);
+                            Monocle.Events.listen(window, 'resize', onResize);
+                        }
+
+
+                        function onResize() {
+                            window.reader.resized();
+                        }
+
+
+                    window.reader = Monocle.Reader('reader', QT.bookdata, options,prep);
+
+
+                });
+
+                $(window).bind(QT.bookdata.events().LOADING, function(event, arr) {
+                    console.log(arr[0], arr[1]);
+                });
+
+                QT.bookdata.init("dragon.epub");
+                //		jQuery.get("dragon.epub", function (data) {
+                //			//var decodedData = someBase64DecoderHere(data); // Find a base64 decoder on google or whatever. 
+                //			//var epubFile = ...; // Use HTML5 files or download via XHR.
+                //			
+                //			var epub = new JSEpub(data);
+                //
+                //			var showFirstPage = function () {
+                //			// The spine lists all pages in correct order
+                //			var spine = epub.opf.spine[0];
+                //            console.log('spine', spine);
+                //			// The manifest contains the href of the file
+                //			var href = epub.opf.manifest[spine]["href"];
+                //            console.log('href', href);
+                //			// All the files are stored in here, indexed by href
+                //			var doc = epub.files[href];
+                //            console.log('doc', doc);
+                //			// The doc is a DOMparser created DOM. You may want to
+                //			// work with a string version of the page contents.
+                //			var html = new XMLSerializer().serializeToString(doc);
+                //			console.log('html', html);
+                //            
+                //			// Use "html" to your hearts content!
+                //			}
+                //
+                //// Each time something happens in the processing, the callbakc is called. The
+                //// step is a number, representing the actual step that was performed. You
+                //// can use this to render status messages to the user as you process the file.
+                //// The processor will also insert a tiny delay between each operation, so that
+                //// you don't get the browser slow script warnings.
+                //epub.processInSteps(function (step, extras) {
+                //    var msg;
+                //
+                //    if (step === 1) {
+                //        msg = "Unzipping";
+                //    } else if (step === 2) {
+                //        msg = "Uncompressing " + extras;
+                //    } else if (step === 3) {
+                //        msg = "Reading OPF";
+                //    } else if (step === 4) {
+                //        msg = "Post processing";
+                //    } else if (step === 5) {
+                //        msg = "Finishing";
+                //        showFirstPage();
+                //    }
+                //
+                //    // Render the "msg" here.
+                //});
+                //		});
+            })
+
+
+
+
+
+            /*
+      // Initialize the reader element.
+      Monocle.Events.listen(
+        window,
+        'load',
+        function () {
+          window.reader = Monocle.Reader('rabbit');
+          Monocle.Events.listen(
+            window,
+            'resize',
+            function () { window.reader.resized() }
+          );
+        }
+      );*/
+        </script>
+    </head>
+    
+    <body>
+        <div id="reader"></div>
+    </body>
+
+</html>

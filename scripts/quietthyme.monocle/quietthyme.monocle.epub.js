@@ -54,7 +54,7 @@ QT.bookdata = (function(qt){
      */ 
     function getBinaryFile(url, callback) {
         var request = useMSXHR() ? new ActiveXObject("Msxml2.XmlHttp.6.0")
-				: new XMLHttpRequest();
+    			: new XMLHttpRequest();
 		request.onreadystatechange = function() {
 			if (request.readyState == 1) {
 				if (request.overrideMimeType) {
@@ -564,8 +564,10 @@ QT.bookdata = (function(qt){
     }
     var getComponent = function (componentId, callback) {
         //todo: decide if it would be better/faster to unzip the file on demand. for now just display the unzipped file.
-        console.log('getComponent',componentId,_files[componentId].body.outerHTML);
-        return _files[componentId].body.outerHTML;
+        console.log('getComponent',componentId,_files[componentId].documentElement.outerHTML);
+        
+        
+        return _files[componentId].documentElement.outerHTML;
     }
     var getMetaData = function(key) {
         switch (key) {

@@ -1,0 +1,120 @@
+body {
+  margin: 0;
+  padding: 0;
+  background: #000;
+  -webkit-user-select: none;
+  -webkit-text-size-adjust: none;
+  font-family: Helvetica Neue, Helvetica, sans-serif;
+  font-size: 85%;
+  line-height: 130%;
+}
+
+h1 {
+  line-height: 110%;
+}
+
+#reader {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+}
+
+@media screen and (min-width: 800px) {
+  #reader {
+    max-width: 600px;
+    max-height: 800px;
+  }
+}
+
+#reader div pre {
+  white-space: normal;
+  font: normal 100% serif;
+}
+
+.bookTitle {
+  position: absolute;
+  bottom: 0;
+  height: 20px;
+  left: 0;
+  right: 40px;
+  cursor: system;
+  background: #282626;
+  color: #DDD;
+  padding: 12px 8px 4px;
+  white-space: nowrap;
+  font-size: 80%;
+}
+
+
+.tocButton {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  width: 40px;
+  height: 36px;
+  background: #282626 url(newbook-toc-btn.gif) no-repeat;
+}
+
+
+.pageNumber {
+  position: absolute;
+  top: 12%;
+  right: 12px;
+  color: #555;
+  font: bold 14pt Helvetica, Arial, sans-serif;
+  border-bottom: 1px solid #999;
+}
+
+div.monelem_container {
+  background: #CCC;
+}
+
+div.monelem_page {
+  right: 0;
+  top: 6px;
+  bottom: 42px;
+  border: 2px solid #BBB;
+  border-left: none;
+  background-color: #FFF;
+}
+
+div.monelem_sheaf {
+  top: 1.2em;
+  right: 3.5em;
+}
+
+
+
+div.monelem_controls_contents_container {
+  background: #F7F4EE;
+  border: 1px solid #DDD;
+  width: auto;
+  height: auto;
+  right: auto;
+  top: auto;
+  left: 0;
+  max-height: 65%;
+  max-width: 95%;
+  bottom: 36px;
+  box-shadow: none;
+  -moz-box-shadow: none;
+  -webkit-box-shadow: none;
+  border-radius: 0;
+  -moz-border-radius: 0;
+  -webkit-border-radius: 0;
+}
+
+ol.monelem_controls_contents_list:before {
+  content: "Table of Contents";
+  font-weight: bold;
+  font-size: 16pt;
+  padding-left: 16px;
+  line-height: 2em;
+}
+
+
+li.monelem_controls_contents_chapter {
+  border-bottom: none;
+  list-style: decimal inside;
+  padding-left: 16px;
+}

@@ -11,7 +11,9 @@
     />
     <title>The Velveteen Rabbit - Monocle</title>
     <link rel="stylesheet" type="text/css" href="css/monocle/monocore.css" />
-
+    
+    <link rel="stylesheet" type="text/css" href="http://monocle.inventivelabs.com.au/static/styles/monoctrl.css" />
+    <link rel="stylesheet" type="text/css" href="http://monocle.inventivelabs.com.au/static/styles/newbook.css" />
     
     <style type="text/css">
       #rabbit {
@@ -24,13 +26,13 @@
     </style>
      <script src="scripts/jquery-1.7.1.min.js"></script>
     <script type="text/javascript" src="scripts/monocle/monocore.js"></script>
-	
-	<script type="text/javascript" src="scripts/zip/jszip.js"></script>
+    
+    <script type="text/javascript" src="scripts/zip/jszip.js"></script>
     <script type="text/javascript" src="scripts/zip/jszip-load.js"></script>
     <script type="text/javascript" src="scripts/zip/jszip-deflate.js"></script>
     <script type="text/javascript" src="scripts/zip/jszip-inflate.js"></script>
 	
-    <script type="text/javascript" src="scripts/quietthyme.monocle.bookdata/quietthyme.monocle.epub.js"></script>
+    <script type="text/javascript" src="scripts/quietthyme.monocle/quietthyme.monocle.epub.js"></script>
     
     <script type="text/javascript">
 	$(function(){
@@ -38,7 +40,13 @@
    $(window).bind(QT.bookdata.events().BOOKDATA_READY, function(event, param1) {
         console.log('READY:' + param1);
         Monocle.DEBUG = true;
+        
+        
+        
+        
         Monocle.Reader('rabbit', QT.bookdata, {});
+        
+        
     });
 
     $(window).bind(QT.bookdata.events().LOADING, function(event, arr) {
