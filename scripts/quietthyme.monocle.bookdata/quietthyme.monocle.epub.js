@@ -35,6 +35,8 @@ QT.bookdata = (function(qt){
     var _container;
     var _mimetype;
     var _opf;
+    var _epubVersion;
+    var _ncx;
     //////////////////////////////////////////////////////////////////////////
     // Private Methods
     //////////////////////////////////////////////////////////////////////////
@@ -194,11 +196,19 @@ QT.bookdata = (function(qt){
         var manifestEntries = doc
             .getElementsByTagName("manifest")[0]
             .getElementsByTagName("item");
-
+        
+        var ncxFile = '';
         for (var i = 0, il = manifestEntries.length; i < il; i++) {
             var node = manifestEntries[i];
-
-            opf.manifest[node.getAttribute("id")] = {
+            var id = node.getAttribute("id");
+            var href= node.getAttribute("href");
+            
+            if (href.indexOf('.ncx') != -1
+    					|| id.toLowerCase() === 'toc') {
+				ncxFile = href;
+			}
+            
+            opf.manifest[id] = {
                 "href": resolvePath(node.getAttribute("href"), _opfPath),
                 "media-type": node.getAttribute("media-type")
             }
@@ -214,6 +224,87 @@ QT.bookdata = (function(qt){
         }
 
         _opf = opf;
+        
+        
+        console.log(xml);
+        _epubVersion = parseInt(xml.getAttribute("version"), 10);
+        if(ncxFile){
+            _ncx = readNcx(_files[ncxFile]);
+        }
+        
+    }
+    
+    function readNcx(xml){
+        var doc = xmlDocument(xml);
+        
+        // ePub 2 compatibility to parse toc.ncx file
+        if (_epubVersion === 2) {
+    	
+            // Some ebooks use navPoint while others use ns:navPoint tags
+            var nav_tag = 'ns\\:navPoint';
+            var content_tag = 'ns\\:content';
+            var text_tag = 'ns\\:text';
+		
+            if ($(f).find('ns\\:navPoint').length == 0) {
+                nav_tag = 'navPoint';
+                content_tag = 'content';
+                text_tag = 'text';
+            }
+		
+            $(f).find(nav_tag).each(
+                function() {
+                    
+                    var link;
+                    
+                    if(oebps_dir){
+                        link = oebps_dir + '/' + $(this).find(content_tag).attr('src');
+    				}
+					else{
+						link = $(this).find(content_tag).attr('src');
+					}
+                    
+                    var title = $(this).find(text_tag+':first').text()
+                    var s = $('<span/>').text(title);
+					var a = $('<a/>').attr(
+							'href',
+							link);
+					// If 's' has a parent navPoint, indent it
+					if ($(this).parent()[0].tagName.toLowerCase() == nav_tag ) {
+						s.addClass('indent');
+					}
+					s.appendTo(a);
+					a.appendTo($('<li/>').appendTo('#toc'));
+                    
+                    toc_arr[toc_arr.length()] = new TOCItem(title,link);
+            }); 
+        }
+
+        // ePub 3 compatibility to parse toc.xhtml file
+        if (epub_version === 3) {
+            $(f).filter('nav[epub:type="toc"]').find('li').each(
+                function() {
+                    var link;
+                    
+                    if(oebps_dir){
+                        link = oebps_dir + '/' + $(this).find('a:first').attr('href');
+                    }
+					else{
+						link =  $(this).find('a:first').attr('href');
+					}
+                    var title = $(this).find('a:first').text();
+					var s = $('<span/>').text(title);
+					var a = $('<a/>').attr('href', link);
+					
+					// If 's' has a parent navPoint, indent it
+					if ($(this).parent().parent()[0].tagName.toLowerCase() === 'li') {
+						s.addClass('indent');
+					}
+					s.appendTo(a);
+					a.appendTo($('<li/>').appendTo('#toc'));
+                    
+                    toc_arr[toc_arr.length()] = new TOCItem(title,link);
+				});
+        }
     }
 
     function resolvePath(path, referrerLocation) {
@@ -417,6 +508,7 @@ QT.bookdata = (function(qt){
         container:          function(){return _container;},
         mimetype:           function(){return _mimetype;},
         opf:                function(){return _opf;},
+        ncx:                function(){return _ncx;},
         publish:    publish,
         
         /*Monocle Book Data Interface Methods*/
