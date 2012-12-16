@@ -23,3 +23,4 @@
 {"ts":1355683738563,"patch":[[{"diffs":[[0,"eader('r"],[-1,"abbit"],[1,"eader"],[0,"', QT.bo"]],"start1":1698,"start2":1698,"length1":21,"length2":21}]],"length":4277,"saved":false}
 {"ts":1355683765605,"patch":[[{"diffs":[[0,"eader('r"],[-1,"eader"],[1,"abbit"],[0,"', QT.bo"]],"start1":1698,"start2":1698,"length1":21,"length2":21}]],"length":4277,"saved":false}
 {"ts":1355683928758,"patch":[[{"diffs":[[0,"iv id=\"r"],[-1,"eader"],[1,"abbit"],[0,"\">\r\n\r\n  "]],"start1":4216,"start2":4216,"length1":21,"length2":21}]],"length":4277,"saved":false}
+{"contributors":[],"silentsave":false,"ts":1355689240772,"patch":[[{"diffs":[[0,"a.init(\""],[1,"epub/"],[0,"dragon.e"]],"start1":1903,"start2":1903,"length1":16,"length2":21}]],"length":4282,"saved":false}

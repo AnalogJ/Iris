@@ -63,11 +63,11 @@
 
                 });
 
-                $(window).bind(QT.bookdata.events().LOADING, function(event, arr) {
-                    console.log(arr[0], arr[1]);
+                $(window).bind(QT.bookdata.events().LOADING, function(event, state, msg) {
+                    console.log(state,msg);
                 });
 
-                QT.bookdata.init("dragon.epub");
+                QT.bookdata.init("epub/helpinghand.epub");
                 //		jQuery.get("dragon.epub", function (data) {
                 //			//var decodedData = someBase64DecoderHere(data); // Find a base64 decoder on google or whatever. 
                 //			//var epubFile = ...; // Use HTML5 files or download via XHR.

@@ -227,16 +227,16 @@ QT.bookdata = (function(qt){
 
         for (var i = 0, il = spineEntries.length; i < il; i++) {
             var node = spineEntries[i];
-            opf.spine.push((_oebpsDir ? _oebpsDir+ '/' : '') + node.getAttribute("idref"));
+            opf.spine.push(node.getAttribute("idref"));
         }
 
         _opf = opf;
         
         
-        console.log(doc);
+        console.log(doc, ncxFile);
         _epubVersion = parseInt(doc.getElementsByTagName("package")[0].getAttribute("version"), 10);
         if(ncxFile){
-            _ncx = readNcx(_files[ncxFile]);
+            _ncx = readNcx(_files[resolvePath(ncxFile, _opfPath)]);
         }
         
     }
@@ -323,7 +323,9 @@ QT.bookdata = (function(qt){
     function recursive2NcxParser(navPointElement){
         var navPointChildren = navPointElement.childNodes;
         
-        var link = navPointElement.getElementsByTagName("content")[0].getAttribute("src");
+        
+        
+        var link = resolvePath(navPointElement.getElementsByTagName("content")[0].getAttribute("src"), _opfPath);
         var title = navPointElement.getElementsByTagName("navLabel")[0].getElementsByTagName("text")[0].textContent;
         
         var tocItem = new TocItem(title,link);
@@ -409,15 +411,15 @@ QT.bookdata = (function(qt){
         for (var key in _opf.manifest) {
             var mediaType = _opf.manifest[key]["media-type"]
             var href = _opf.manifest[key]["href"]
-            var result;
+            var result = '';
 
             if (mediaType === "text/css") {
                 result = postProcessCSS(href);
             } else if (mediaType === "application/xhtml+xml") {
                 result = postProcessHTML(href);
             }
-
-            if (result !== undefined) {
+            //only change the current file stored in _files if result is defined.
+            if (result) {
                 _files[href] = result;
             }
         }
@@ -456,6 +458,28 @@ QT.bookdata = (function(qt){
             }
             image.setAttribute("src", getDataUri(src, href))
         }
+        
+        var svgImages = doc.getElementsByTagName("image");
+        for (var i = 0, il = svgImages.length; i < il; i++) {
+            var image = svgImages[i];
+            var src = (image.getAttribute("href") ? image.getAttribute("href") : image.getAttributeNS("http://www.w3.org/1999/xlink","href"));
+            if(!src){
+                continue;
+            }
+            if (/^data/.test(src)) { 
+                continue;
+            }
+            //create a newnode.
+            var newImgNode= doc.createElement("img");
+            newImgNode.setAttribute("src", getDataUri(src, href));
+            newImgNode.height = image.height;
+            newImgNode.width = image.width;
+            
+            //replace node.
+            image.parentNode.replaceChild(newImgNode, image);
+            
+        }
+        
 
         var head = doc.getElementsByTagName("head")[0];
         var links = head.getElementsByTagName("link");
@@ -535,7 +559,7 @@ QT.bookdata = (function(qt){
     //////////////////////////////////////////////////////////////////////////
     
     function publish(event, state, message){
-        $(window).trigger(event, [state, message]);
+        $(window).trigger(event, state, message);
     }
     function subscribe(selector, event, handler){
         $(selector).bind(event, handler);
