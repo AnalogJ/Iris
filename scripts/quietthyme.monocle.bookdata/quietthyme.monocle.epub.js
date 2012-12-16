@@ -226,8 +226,8 @@ QT.bookdata = (function(qt){
         _opf = opf;
         
         
-        console.log(xml);
-        _epubVersion = parseInt(xml.getAttribute("version"), 10);
+        console.log(doc);
+        _epubVersion = parseInt(doc.getElementsByTagName("package")[0].getAttribute("version"), 10);
         if(ncxFile){
             _ncx = readNcx(_files[ncxFile]);
         }
@@ -237,76 +237,130 @@ QT.bookdata = (function(qt){
     function readNcx(xml){
         var doc = xmlDocument(xml);
         
-        // ePub 2 compatibility to parse toc.ncx file
-        if (_epubVersion === 2) {
-    	
-            // Some ebooks use navPoint while others use ns:navPoint tags
-            var nav_tag = 'ns\\:navPoint';
-            var content_tag = 'ns\\:content';
-            var text_tag = 'ns\\:text';
-		
-            if ($(f).find('ns\\:navPoint').length == 0) {
-                nav_tag = 'navPoint';
-                content_tag = 'content';
-                text_tag = 'text';
-            }
-		
-            $(f).find(nav_tag).each(
-                function() {
-                    
-                    var link;
-                    
-                    if(oebps_dir){
-                        link = oebps_dir + '/' + $(this).find(content_tag).attr('src');
-    				}
-					else{
-						link = $(this).find(content_tag).attr('src');
-					}
-                    
-                    var title = $(this).find(text_tag+':first').text()
-                    var s = $('<span/>').text(title);
-					var a = $('<a/>').attr(
-							'href',
-							link);
-					// If 's' has a parent navPoint, indent it
-					if ($(this).parent()[0].tagName.toLowerCase() == nav_tag ) {
-						s.addClass('indent');
-					}
-					s.appendTo(a);
-					a.appendTo($('<li/>').appendTo('#toc'));
-                    
-                    toc_arr[toc_arr.length()] = new TOCItem(title,link);
-            }); 
-        }
+        var tocItems = [];
+        
+        
 
         // ePub 3 compatibility to parse toc.xhtml file
-        if (epub_version === 3) {
-            $(f).filter('nav[epub:type="toc"]').find('li').each(
-                function() {
-                    var link;
-                    
-                    if(oebps_dir){
-                        link = oebps_dir + '/' + $(this).find('a:first').attr('href');
-                    }
-					else{
-						link =  $(this).find('a:first').attr('href');
-					}
-                    var title = $(this).find('a:first').text();
-					var s = $('<span/>').text(title);
-					var a = $('<a/>').attr('href', link);
-					
-					// If 's' has a parent navPoint, indent it
-					if ($(this).parent().parent()[0].tagName.toLowerCase() === 'li') {
-						s.addClass('indent');
-					}
-					s.appendTo(a);
-					a.appendTo($('<li/>').appendTo('#toc'));
-                    
-                    toc_arr[toc_arr.length()] = new TOCItem(title,link);
-				});
+        if (_epubVersion === 3) {
+            
+            var navTopLevelEntries = doc
+            .getElementsByTagName("nav");
+            
+            for (var i = 0, il = navTopLevelEntries.length; i < il; i++) {
+                var node = navTopLevelEntries[i];
+                if(node.getAttribute("type") != "toc" ){
+                    continue;
+                }
+                
+                
+                var olElement = node.children[0];
+                
+                for(var ii = 0, iil = olElement.children.length; ii < iil; ii++) {
+                    var liElement = olElement.children[ii];
+                    tocItems.push(recursive3NcxParser(liElement));
+                }
+                
+//                if(oebps_dir){
+//                    link = oebps_dir + '/' + $(this).find(content_tag).attr('src');
+//            	}
+//				else{
+//					link = $(this).find(content_tag).attr('src');
+//				}
+            }
+            
         }
+        // ePub 2 compatibility to parse toc.ncx file
+        //if (_epubVersion === 2) {
+        else{
+        
+//            // Some ebooks use navPoint while others use ns:navPoint tags
+//            var nav_tag = 'ns\\:navPoint';
+//            var content_tag = 'ns\\:content';
+//            var text_tag = 'ns\\:text';
+//		
+//            if ($(f).find('ns\\:navPoint').length == 0) {
+//                nav_tag = 'navPoint';
+//                content_tag = 'content';
+//                text_tag = 'text';
+//            }
+            var navPointTopLevelEntries = doc
+            .getElementsByTagName("navMap")[0]
+            .children;
+		
+            
+            for (var i = 0, il = navPointTopLevelEntries.length; i < il; i++) {
+                var node = navPointTopLevelEntries[i];
+                if(node.nodeName.toLowerCase() != "navpoint"){
+                    continue;
+                }
+                
+                tocItems.push(recursive2NcxParser(node));
+                
+                
+//                if(oebps_dir){
+//                    link = oebps_dir + '/' + $(this).find(content_tag).attr('src');
+//        		}
+//				else{
+//					link = $(this).find(content_tag).attr('src');
+//				}
+            }
+             
+        }
+        return tocItems;
     }
-
+    
+    function recursive2NcxParser(navPointElement){
+        var navPointChildren = navPointElement.children;
+        
+        var link = navPointElement.getElementsByTagName("content")[0].getAttribute("src");
+        var title = navPointElement.getElementsByTagName("text")[0].text;
+        
+        var tocItem = new TocItem(title,link);
+        
+        for (var i = 0, il = navPointChildren.length; i < il; i++) {
+            var childNavPoint = navPointChildren[i];
+            if(childNavPoint.nodeName.toLowerCase() == "navpoint"){
+                tocItem.children.push(recursiveNcxParser(childNavPoint));
+            }
+        }
+        return tocItem;
+    }
+    
+    function recursive3NcxParser(liElement){
+        var liChildren = liElement.children;
+        
+        var tocItem = new TocItem('placeholder title','');
+        for (var i = 0, il = liChildren.length; i < il; i++) {
+            var childElement = liChildren[i];
+            if(childElement.nodeName.toLowerCase() == "a" || childElement.nodeName.toLowerCase() == "span"){
+                tocItem.push(recursiveNcxParser(childNavPoint));
+                var link = liATag.getAttribute("href");
+                var title = liATag.text;
+        
+                tocItem.title =title;
+                tocItem.src = link;
+            }
+            if(childElement.nodeName.toLowerCase() == "ol"){
+                var olChildren = childElement.children;
+                for(var ii = 0, iil = liChildren.length; ii < iil; ii++) {
+                    var olChild = olChildren[ii];
+                    tocItem.children.push(recursive3NcxParser(olChild))                    
+                }
+            }
+        }
+        
+        return tocItem;
+        
+    }
+    
+    
+    function TocItem(title, src){
+        this.title = title;
+        this.src = src;
+        this.children = [];
+    }
+    
     function resolvePath(path, referrerLocation) {
         var pathDirs = path.split("/");
         var fileName = pathDirs.pop();
