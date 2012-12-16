@@ -564,8 +564,8 @@ QT.bookdata = (function(qt){
     }
     var getComponent = function (componentId, callback) {
         //todo: decide if it would be better/faster to unzip the file on demand. for now just display the unzipped file.
-        console.log('getComponent',componentId,_files[componentId]);
-        return _files[componentId];
+        console.log('getComponent',componentId,_files[componentId].body.outerHTML);
+        return _files[componentId].body.outerHTML;
     }
     var getMetaData = function(key) {
         switch (key) {
