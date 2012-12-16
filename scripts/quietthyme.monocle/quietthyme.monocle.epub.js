@@ -80,7 +80,7 @@ QT.bookdata = (function(qt){
 					console.log('Failed to get file ' + url + '<br>');
 				}
 			}
-		}
+		};
 		request.open("GET", url, true);
 	}
     
@@ -107,7 +107,7 @@ QT.bookdata = (function(qt){
                 }
             }
             
-            uncompressNextCompressedFile()
+            uncompressNextCompressedFile();
             
         //}
         //catch(ex){
@@ -125,7 +125,7 @@ QT.bookdata = (function(qt){
         } else {
             didUncompressAllFiles();
         }
-    };
+    }
         
     // For mockability
     function withTimeout(func) {
@@ -133,7 +133,7 @@ QT.bookdata = (function(qt){
         setTimeout(function () {
             func.call(self);
         }, 30);
-    };
+    }
 
     function didUncompressAllFiles() {
             publish(EVENT.LOADING, STATE.OK, MSG.READING_OPF);
@@ -218,7 +218,7 @@ QT.bookdata = (function(qt){
             opf.manifest[id] = {
                 "href": resolvePath(node.getAttribute("href"), _opfPath),
                 "media-type": node.getAttribute("media-type")
-            }
+            };
         }
 
         var spineEntries = doc
@@ -456,7 +456,7 @@ QT.bookdata = (function(qt){
             if (/^data/.test(src)) { 
                 continue;
             }
-            image.setAttribute("src", getDataUri(src, href))
+            image.setAttribute("src", getDataUri(src, href));
         }
         
         var svgImages = doc.getElementsByTagName("image");
@@ -581,18 +581,18 @@ QT.bookdata = (function(qt){
         
         console.log('getComponents',componentArr);
         return componentArr;
-    }
+    };
     var getContents = function () {
         console.log('getContents',_ncx);
        return _ncx;
-    }
+    };
     var getComponent = function (componentId, callback) {
         //todo: decide if it would be better/faster to unzip the file on demand. for now just display the unzipped file.
         console.log('getComponent',componentId,_files[componentId].documentElement.outerHTML);
         
         
         return _files[componentId].documentElement.outerHTML;
-    }
+    };
     var getMetaData = function(key) {
         switch (key) {
             case "title":
@@ -605,7 +605,7 @@ QT.bookdata = (function(qt){
                 break;
             case "creator":
                 try{
-                    return _opf.metadata['dc:creator']._text
+                    return _opf.metadata['dc:creator']._text;
                 }
                 catch(ex){
                     return '';
@@ -614,7 +614,7 @@ QT.bookdata = (function(qt){
         }
         return '';
             
-    }
+    };
     
     return {
         init :  init,
@@ -636,7 +636,7 @@ QT.bookdata = (function(qt){
         getContents : getContents,
         getComponent : getComponent,
         getMetaData : getMetaData
-    }
+    };
         
     
 })(QT)

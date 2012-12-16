@@ -10,7 +10,7 @@ function controlContents(reader) {
   var tocMenu = Monocle.Controls.Contents(reader);
   reader.addControl(tocMenu, 'popover', { hidden: true });
 
-  var tocButton = {}
+  var tocButton = {};
   tocButton.createControlElements = function () {
     var btn = document.createElement('div');
     btn.className = "tocButton";
@@ -45,14 +45,14 @@ function controlContents(reader) {
       }
     );
     return btn;
-  }
+  };
   reader.addControl(tocButton);
   return tocButton;
 }
 
 
 function controlTitle(reader) {
-  var bookTitle = {}
+  var bookTitle = {};
   bookTitle.createControlElements = function () {
     var cntr = document.createElement('div');
     cntr.className = "bookTitle";
@@ -63,7 +63,7 @@ function controlTitle(reader) {
     btText.appendChild(this.chapText);
     this.update();
     return cntr;
-  }
+  };
   bookTitle.update = function () {
     var place = reader.getPlace();
     var t = place.chapterTitle();
@@ -72,7 +72,7 @@ function controlTitle(reader) {
     } else {
       this.chapText.innerHTML = "";
     }
-  }
+  };
 
   reader.addControl(bookTitle);
   reader.listen('monocle:turn', function () { bookTitle.update() });
@@ -99,7 +99,7 @@ function controlPageNumber(reader) {
         this.runners[page.m.pageIndex].innerHTML = place.pageNumber();
       }
     }
-  }
+  };
   reader.addControl(pageNumber, 'page');
   reader.listen(
     'monocle:pagechange',
