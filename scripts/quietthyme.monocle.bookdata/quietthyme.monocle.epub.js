@@ -37,6 +37,7 @@ QT.bookdata = (function(qt){
     var _opf;
     var _epubVersion;
     var _ncx;
+    var _oebpsDir = '';
     //////////////////////////////////////////////////////////////////////////
     // Private Methods
     //////////////////////////////////////////////////////////////////////////
@@ -137,6 +138,12 @@ QT.bookdata = (function(qt){
     function didUncompressAllFiles() {
             publish(EVENT.LOADING, STATE.OK, MSG.READING_OPF);
             _opfPath = getOpfPathFromContainer();
+            
+            // Get the OEPBS dir, if there is one
+            if (_opfPath.indexOf('/') != -1) {
+                _oebpsDir =  _opfPath.substr(0, _opfPath.lastIndexOf('/'));
+            }
+            
             readOpf(_files[_opfPath]);
 
             publish(EVENT.LOADING, STATE.OK, MSG.POST_PROCESSING);
@@ -220,7 +227,7 @@ QT.bookdata = (function(qt){
 
         for (var i = 0, il = spineEntries.length; i < il; i++) {
             var node = spineEntries[i];
-            opf.spine.push(node.getAttribute("idref"));
+            opf.spine.push((_oebpsDir ? _oebpsDir+ '/' : '') + node.getAttribute("idref"));
         }
 
         _opf = opf;
@@ -254,10 +261,13 @@ QT.bookdata = (function(qt){
                 }
                 
                 
-                var olElement = node.children[0];
+                var olElement = node.firstElementChild;
                 
-                for(var ii = 0, iil = olElement.children.length; ii < iil; ii++) {
-                    var liElement = olElement.children[ii];
+                for(var ii = 0, iil = olElement.childNodes.length; ii < iil; ii++) {
+                    var liElement = olElement.childNodes[ii];
+                    if(liElement.nodeName.toLowerCase() != "li"){
+                        continue;
+                    }
                     tocItems.push(recursive3NcxParser(liElement));
                 }
                 
@@ -286,7 +296,7 @@ QT.bookdata = (function(qt){
 //            }
             var navPointTopLevelEntries = doc
             .getElementsByTagName("navMap")[0]
-            .children;
+            .childNodes;
 		
             
             for (var i = 0, il = navPointTopLevelEntries.length; i < il; i++) {
@@ -311,7 +321,7 @@ QT.bookdata = (function(qt){
     }
     
     function recursive2NcxParser(navPointElement){
-        var navPointChildren = navPointElement.children;
+        var navPointChildren = navPointElement.childNodes;
         
         var link = navPointElement.getElementsByTagName("content")[0].getAttribute("src");
         var title = navPointElement.getElementsByTagName("text")[0].text;
@@ -321,23 +331,23 @@ QT.bookdata = (function(qt){
         for (var i = 0, il = navPointChildren.length; i < il; i++) {
             var childNavPoint = navPointChildren[i];
             if(childNavPoint.nodeName.toLowerCase() == "navpoint"){
-                tocItem.children.push(recursiveNcxParser(childNavPoint));
+                tocItem.children.push(recursive2NcxParser(childNavPoint));
             }
         }
         return tocItem;
     }
     
     function recursive3NcxParser(liElement){
-        var liChildren = liElement.children;
+        var liChildren = liElement.childNodes;
         
         var tocItem = new TocItem('placeholder title','');
         for (var i = 0, il = liChildren.length; i < il; i++) {
             var childElement = liChildren[i];
             if(childElement.nodeName.toLowerCase() == "a" || childElement.nodeName.toLowerCase() == "span"){
-                tocItem.push(recursiveNcxParser(childNavPoint));
-                var link = liATag.getAttribute("href");
-                var title = liATag.text;
-        
+                
+                var link = childElement.getAttribute("href");
+                var title = childElement.text;
+                
                 tocItem.title =title;
                 tocItem.src = link;
             }
@@ -345,7 +355,7 @@ QT.bookdata = (function(qt){
                 var olChildren = childElement.children;
                 for(var ii = 0, iil = liChildren.length; ii < iil; ii++) {
                     var olChild = olChildren[ii];
-                    tocItem.children.push(recursive3NcxParser(olChild))                    
+                    tocItem.children.push(recursive3NcxParser(olChild));                  
                 }
             }
         }
@@ -413,7 +423,6 @@ QT.bookdata = (function(qt){
         }
         publish(EVENT.LOADING,STATE.OK,MSG.FINISHED_POST_PROCESSING);
         publish(EVENT.BOOKDATA_READY, this);
-        console.log(this);
     }
     
     
@@ -539,16 +548,46 @@ QT.bookdata = (function(qt){
     //////////////////////////////////////////////////////////////////////////
     
     var getComponents = function () {
-    
+        
+        var componentArr = [];
+        for(var key in _opf.spine){
+            var spineEntry = _opf.spine[key];
+            componentArr.push(_opf.manifest[spineEntry].href);
+        }
+        
+        console.log('getComponents',componentArr);
+        return componentArr;
     }
     var getContents = function () {
-       
+        console.log('getContents',_ncx);
+       return _ncx;
     }
-    var getComponent = function (componentId) {
-    
+    var getComponent = function (componentId, callback) {
+        //todo: decide if it would be better/faster to unzip the file on demand. for now just display the unzipped file.
+        console.log('getComponent',componentId,_files[componentId]);
+        return _files[componentId];
     }
     var getMetaData = function(key) {
-    
+        switch (key) {
+            case "title":
+                try{
+                    return _opf.metadata['dc:title']._text;
+                }
+                catch(ex){
+                    return '';
+                }
+                break;
+            case "creator":
+                try{
+                    return _opf.metadata['dc:creator']._text
+                }
+                catch(ex){
+                    return '';
+                }
+                break;
+        }
+        return '';
+            
     }
     
     return {
@@ -563,6 +602,7 @@ QT.bookdata = (function(qt){
         mimetype:           function(){return _mimetype;},
         opf:                function(){return _opf;},
         ncx:                function(){return _ncx;},
+        oebpsDir:           function(){return _oebpsDir;},
         publish:    publish,
         
         /*Monocle Book Data Interface Methods*/

@@ -36,7 +36,8 @@
 	$(function(){
 	
    $(window).bind(QT.bookdata.events().BOOKDATA_READY, function(event, param1) {
-        console.log(param1);
+        console.log('READY:' + param1);
+        Monocle.Reader('rabbit', QT.bookdata, {});
     });
 
     $(window).bind(QT.bookdata.events().LOADING, function(event, arr) {
