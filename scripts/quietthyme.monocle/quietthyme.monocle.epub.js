@@ -19,7 +19,9 @@ QT.bookdata = (function(qt){
     MSG.READING_OPF = 'Reading OPF';
     MSG.POST_PROCESSING = 'Post processing';
     MSG.FINISHED = 'Finished!';
-    MSG.FINISHED_POST_PROCESSING = 'FINISHED_POST_PROCESSING';
+    MSG.FINISHED_POST_PROCESSING = 'Finished Post processing';
+    
+    MSG.INIT_EBOOK_READER = 'Initializing Ebook Reader';
     
     MSG.ERR_NOT_ZIP = 'File is not a proper Zip file';
     MSG.ERR_BLANK_URL = 'Zip url cannot be blank';
@@ -148,7 +150,6 @@ QT.bookdata = (function(qt){
 
             publish(EVENT.LOADING, STATE.OK, MSG.POST_PROCESSING);
             postProcess();
-            publish(EVENT.LOADING, STATE.OK, MSG.FINISHED);
     }
 
     function uncompressFile(compressedFile) {
@@ -423,8 +424,7 @@ QT.bookdata = (function(qt){
                 _files[href] = result;
             }
         }
-        publish(EVENT.LOADING,STATE.OK,MSG.FINISHED_POST_PROCESSING);
-        publish(EVENT.BOOKDATA_READY, this);
+        publish(EVENT.BOOKDATA_READY, STATE.OK,MSG.INIT_EBOOK_READER);
     }
     
     
@@ -548,7 +548,7 @@ QT.bookdata = (function(qt){
             
         }
         else{
-            publish(EVENT.LOADING, STATE.ERR,MSG.ERR_BLANK_URL);
+            publish(EVENT.LOADING, STATE.ERR, MSG.ERR_BLANK_URL);
         }
         
         
@@ -559,11 +559,9 @@ QT.bookdata = (function(qt){
     //////////////////////////////////////////////////////////////////////////
     
     function publish(event, state, message){
-        $(window).trigger(event, state, message);
+        $.publish(event, [state, message]);
     }
-    function subscribe(selector, event, handler){
-        $(selector).bind(event, handler);
-    }
+    
     
     
     //////////////////////////////////////////////////////////////////////////

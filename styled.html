@@ -22,6 +22,10 @@
         <script src="scripts/jquery-1.7.1.min.js"></script>
         <script type="text/javascript" src="scripts/monocle/monocore.js"></script>
         <script type="text/javascript" src="scripts/monocle/monoctrl.js"></script>
+                             
+        <script type="text/javascript" src="scripts/pubsub/jquery.pubsub.js"></script>
+        
+        
         <script type="text/javascript" src="scripts/zip/jszip.js"></script>
         <script type="text/javascript" src="scripts/zip/jszip-load.js"></script>
         <script type="text/javascript" src="scripts/zip/jszip-deflate.js"></script>
@@ -30,11 +34,15 @@
         <script type="text/javascript" src="scripts/quietthyme.monocle/quietthyme.monocle.epub.js"></script>
         <script type="text/javascript">
             $(function() {
-
-                $(window).bind(QT.bookdata.events().BOOKDATA_READY, function(event, param1) {
-                    console.log('READY:' + param1);
+                //init piecon.
+                
+                
+                
+                $.subscribe(QT.bookdata.events().BOOKDATA_READY, function(state, msg) {
+                    
+                    console.log('READY:' + state);
+                    $('#reader').html('<h2 style="color:white;margin-left:20px;">'+msg+'</h2>')
                     Monocle.DEBUG = true;
-
 
                     var bkTitle = QT.bookdata.getMetaData('title');
                     window.placeSaver = new Monocle.Controls.PlaceSaver(bkTitle);
@@ -63,8 +71,9 @@
 
                 });
 
-                $(window).bind(QT.bookdata.events().LOADING, function(event, state, msg) {
+                $.subscribe(QT.bookdata.events().LOADING, function(state, msg) {
                     console.log(state,msg);
+                    $('#reader').html('<h2 style="color:white;margin-left:20px;">'+msg+'</h2>');
                 });
 
                 QT.bookdata.init("epub/wayofkings.epub");
@@ -140,7 +149,11 @@
     </head>
     
     <body>
-        <div id="reader"></div>
+        
+        <div id="reader">
+            <h2 style="color:white;margin-left:20px;">loading please wait..</h2>
+            
+        </div>
     </body>
 
 </html>
