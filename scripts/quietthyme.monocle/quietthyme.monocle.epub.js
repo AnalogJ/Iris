@@ -13,7 +13,7 @@ QT.bookdata = (function(qt){
     
     
     var MSG = {};
-    MSG.LOADING_FILE = 'Loading file from url';
+    MSG.LOADING_FILE = 'Downloading ebook file. Please wait...';
     MSG.UNZIPPING = 'Unzipping';
     MSG.UNCOMPRESSING = 'Uncompressing file: ';
     MSG.READING_OPF = 'Reading OPF';

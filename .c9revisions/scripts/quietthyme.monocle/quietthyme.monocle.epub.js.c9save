@@ -244,3 +244,4 @@
 {"ts":1355700589323,"patch":[[{"diffs":[[0,"DING, STATE.ERR,"],[1," "],[0,"MSG.ERR_BLANK_UR"]],"start1":18145,"start2":18145,"length1":32,"length2":33}]],"length":21117,"saved":false}
 {"ts":1355700988638,"patch":[[{"diffs":[[0,");\r\n"],[-1,"            publish(EVENT.LOADING, STATE.OK, MSG.FINISHED);\r\n"],[0,"    "]],"start1":4784,"start2":4784,"length1":69,"length2":8}]],"length":21056,"saved":false}
 {"ts":1355701035565,"patch":[[{"diffs":[[0," }\r\n"],[-1,"        publish(EVENT.LOADING, STATE.OK, MSG.FINISHED_POST_PROCESSING);\r\n"],[0,"    "]],"start1":13848,"start2":13848,"length1":81,"length2":8}]],"length":20983,"saved":false}
+{"ts":1355702571772,"patch":[[{"diffs":[[0," = '"],[-1,"L"],[1,"Downl"],[0,"oading "],[-1,"file from url"],[1,"ebook file. Please wait..."],[0,"';\r\n"]],"start1":426,"start2":426,"length1":29,"length2":46}]],"length":21000,"saved":false}

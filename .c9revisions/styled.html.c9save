@@ -84,3 +84,5 @@
 {"ts":1355700470065,"patch":[[{"diffs":[[0,"aram1);\n"],[1,"                    $('#reader').html('<h2 style=\"color:white;margin-left:20px;\">'+msg+'</h2>')\n"],[0,"        "]],"start1":2075,"start2":2075,"length1":16,"length2":112}]],"length":6899,"saved":false}
 {"ts":1355700473912,"patch":[[{"diffs":[[0,"state, m"],[-1,"essage"],[1,"sg"],[0,") {\n    "]],"start1":1992,"start2":1992,"length1":22,"length2":18}]],"length":6895,"saved":false}
 {"ts":1355700887796,"patch":[[{"diffs":[[0,"' + "],[-1,"param1"],[1,"state"],[0,");\n "]],"start1":2066,"start2":2066,"length1":14,"length2":13}]],"length":6894,"saved":false}
+{"ts":1355701266908,"patch":[[{"diffs":[[0,"tle>"],[-1,"The Velveteen Rabbit - Monocle"],[1,"QuietThyme - Behold Ebook Reader"],[0,"</ti"]],"start1":321,"start2":321,"length1":38,"length2":40}]],"length":6896,"saved":false}
+{"ts":1355701417458,"patch":[[{"diffs":[[0,"e - "],[-1,"Behold"],[1,"Iris"],[0," Ebo"]],"start1":334,"start2":334,"length1":14,"length2":12}]],"length":6894,"saved":false}
