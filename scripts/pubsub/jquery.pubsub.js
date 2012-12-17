@@ -1,3 +1,4 @@
+// @reference jquery
 /* Author: Jason Kulatunga
 Description: Modified version of pubSub by Peter Higgins.
 */

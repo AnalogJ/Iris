@@ -1,4 +1,11 @@
-// @reference jszip.js
+// @reference jquery
+// @reference ../pubsub/jquery.pubsub.js
+// @reference ../monocle/monocore.js
+// @reference ../zip/jszip.js
+// @reference ../zip/jszip-load.js
+// @reference ../zip/jszip-deflate.js
+// @reference ../zip/jszip-inflate.js
+
 
 var QT = QT || {};
 
