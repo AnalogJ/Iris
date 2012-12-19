@@ -1887,7 +1887,7 @@ Monocle.Reader = function (node, bookData, options, onLoadCallback) {
 
     if (!Monocle.Browser.env.isCompatible()) {
       if (dispatchEvent("monocle:incompatible", {}, true)) {
-        API.billboard.show(k.SUPPORT_URL, { closeButton: false });
+        //API.billboard.show('https://www.google.ca', { closeButton: false });
       }
       return;
     }

@@ -37,6 +37,10 @@ QT.bookdata = (function(qt){
     STATE.OK = 1;
     STATE.ERR = 2;
     
+    var TOCTYPE =  {};
+    TOCTYPE.XHTML = 1;
+    TOCTYPE.XML = 2;
+    
     var _unzipper;
     var _compressedFiles;
     var _files = {};
@@ -47,6 +51,8 @@ QT.bookdata = (function(qt){
     var _epubVersion;
     var _ncx;
     var _oebpsDir = '';
+    var _ncxPath = '';
+    var _tocType = TOCTYPE.XML;
     //////////////////////////////////////////////////////////////////////////
     // Private Methods
     //////////////////////////////////////////////////////////////////////////
@@ -188,6 +194,11 @@ QT.bookdata = (function(qt){
             spine: []
         };
 
+        //Get the epub version from the package tag. 
+        _epubVersion = parseInt(doc.getElementsByTagName("package")[0].getAttribute("version"), 10);
+        
+
+
         var metadataNodes = doc
             .getElementsByTagName("metadata")[0]
             .childNodes;
@@ -195,7 +206,7 @@ QT.bookdata = (function(qt){
         for (var i = 0, il = metadataNodes.length; i < il; i++) {
             var node = metadataNodes[i];
             // Skip text nodes (whitespace)
-            if (node.nodeType === 3) { 
+            if ((node.nodeType === 3) || (node.nodeType == 8)) { 
                 continue; 
             }
 
@@ -218,10 +229,15 @@ QT.bookdata = (function(qt){
             var id = node.getAttribute("id");
             var href= node.getAttribute("href");
             
-            if (href.indexOf('.ncx') != -1
-    					|| id.toLowerCase() === 'toc') {
+            if (href.indexOf('.ncx') != -1) 
+            {
+                _tocType = TOCTYPE.XML
 				ncxFile = href;
 			}
+            else if(id.toLowerCase() === 'toc' || id.toLowerCase() === 'nav'){
+                _tocType = TOCTYPE.XHTML;
+                ncxFile = href;
+            }
             
             opf.manifest[id] = {
                 "href": resolvePath(node.getAttribute("href"), _opfPath),
@@ -240,31 +256,31 @@ QT.bookdata = (function(qt){
 
         _opf = opf;
         
-        
-        console.log(doc, ncxFile);
-        _epubVersion = parseInt(doc.getElementsByTagName("package")[0].getAttribute("version"), 10);
         if(ncxFile){
-            _ncx = readNcx(_files[resolvePath(ncxFile, _opfPath)]);
+            // resolve the absolute path for the ncxFile
+            _ncxPath = resolvePath(ncxFile, _opfPath);
+            _ncx = readNcx(_files[_ncxPath]);
         }
+        
         
     }
     
     function readNcx(xml){
         var doc = xmlDocument(xml);
-        
+        console.log(doc, "toc")
         var tocItems = [];
         
         
 
         // ePub 3 compatibility to parse toc.xhtml file
-        if (_epubVersion === 3) {
+        if (_tocType == TOCTYPE.XHTML) {
             
             var navTopLevelEntries = doc
             .getElementsByTagName("nav");
-            
+            console.log(navTopLevelEntries)
             for (var i = 0, il = navTopLevelEntries.length; i < il; i++) {
                 var node = navTopLevelEntries[i];
-                if(node.getAttribute("type") != "toc" ){
+                if(node.getAttributeNS("http://www.idpf.org/2007/ops","type") != "toc" ){
                     continue;
                 }
                 
@@ -276,7 +292,10 @@ QT.bookdata = (function(qt){
                     if(liElement.nodeName.toLowerCase() != "li"){
                         continue;
                     }
-                    tocItems.push(recursive3NcxParser(liElement));
+                    if(liElement){
+                        tocItems.push(recursive3NcxParser(liElement));
+                    }
+                    
                 }
                 
 //                if(oebps_dir){
@@ -355,8 +374,8 @@ QT.bookdata = (function(qt){
             var childElement = liChildren[i];
             if(childElement.nodeName.toLowerCase() == "a" || childElement.nodeName.toLowerCase() == "span"){
                 
-                var link = childElement.getAttribute("href");
-                var title = childElement.value;
+                var link = resolvePath(childElement.getAttribute("href"), _ncxPath);
+                var title = childElement.value? childElement.value : childElement.text;
                 
                 tocItem.title =title;
                 tocItem.src = link;
@@ -365,7 +384,10 @@ QT.bookdata = (function(qt){
                 var olChildren = childElement.children;
                 for(var ii = 0, iil = liChildren.length; ii < iil; ii++) {
                     var olChild = olChildren[ii];
-                    tocItem.children.push(recursive3NcxParser(olChild));                  
+                    if(olChild){
+                        tocItem.children.push(recursive3NcxParser(olChild)); 
+                    }
+                                     
                 }
             }
         }
@@ -634,6 +656,7 @@ QT.bookdata = (function(qt){
         opf:                function(){return _opf;},
         ncx:                function(){return _ncx;},
         oebpsDir:           function(){return _oebpsDir;},
+        ncxPath:            function(){return _ncxPath;},
         publish:    publish,
         
         /*Monocle Book Data Interface Methods*/
