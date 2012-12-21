@@ -1,41 +1,44 @@
-// @reference jquery
-// @reference ../pubsub/jquery.pubsub.js
-// @reference ../monocle/monocore.js
-// @reference ../zip/jszip.js
-// @reference ../zip/jszip-load.js
-// @reference ../zip/jszip-deflate.js
-// @reference ../zip/jszip-inflate.js
+/// <reference path="~/Scripts/jquery/jquery.min.js" />
+/// <reference path="~/Scripts/pubsub/jquery.pubsub.js" />
+/// <reference path="~/Scripts/monocle/monocore.js" />
+
+/// <reference path="~/Scripts/zip/jszip.js" />
+/// <reference path="~/Scripts/zip/jszip-load.js" />
+/// <reference path="~/Scripts/zip/jszip-deflate.js" />
+/// <reference path="~/Scripts/zip/jszip-inflate.js" />
+
 
 
 var QT = QT || {};
 
-QT.bookdata = (function(qt){
-    
+QT.bookdata = (function(qt) {
+
     //////////////////////////////////////////////////////////////////////////
     // Private Data
     //////////////////////////////////////////////////////////////////////////
-    var EVENT ={};
+    var EVENT = { };
     EVENT.LOADING = 'EVENT_LOADING';
     EVENT.BOOKDATA_READY = 'EVENT_BOOKDATA_READY';
-    
-    
-    var MSG = {};
-    MSG.LOADING_FILE = 'Downloading ebook file. Please wait...';
+
+
+    var MSG = { };
+    MSG.LOADING_FILE = 'Retrieving ebook file. This may take a few minutes depending on your connection speed. Please wait...';
     MSG.UNZIPPING = 'Unzipping';
     MSG.UNCOMPRESSING = 'Uncompressing file: ';
-    MSG.READING_OPF = 'Reading OPF';
+    MSG.READING_OPF = 'Reading Table of Contents';
     MSG.POST_PROCESSING = 'Post processing';
     MSG.FINISHED = 'Finished!';
     MSG.FINISHED_POST_PROCESSING = 'Finished Post processing';
-    
+
     MSG.INIT_EBOOK_READER = 'Initializing Ebook Reader';
-    
+
     MSG.ERR_NOT_ZIP = 'File is not a proper Zip file';
     MSG.ERR_BLANK_URL = 'Zip url cannot be blank';
-    
-    var STATE = {};
+
+    var STATE = { };
     STATE.OK = 1;
     STATE.ERR = 2;
+
     
     var TOCTYPE =  {};
     TOCTYPE.XHTML = 1;
@@ -43,7 +46,7 @@ QT.bookdata = (function(qt){
     
     var _unzipper;
     var _compressedFiles;
-    var _files = {};
+    var _files = { };
     var _opfPath;
     var _container;
     var _mimetype;
@@ -57,80 +60,84 @@ QT.bookdata = (function(qt){
     // Private Methods
     //////////////////////////////////////////////////////////////////////////
     /**
-     * Determines if browser is a version of IE that supports ActiveXObjects.
-     */ 
+    * Determines if browser is a version of IE that supports ActiveXObjects.
+    */
+
     function useMSXHR() {
         return typeof ActiveXObject == "function";
     }
-    /**
-     * Retrieves the epub file from url,
-     * @param {String} url The url for the epub file.
-     * @param {Function} callback The callback that is executed once the epub file has been retrieved.
-     */ 
+
+/**
+    * Retrieves the epub file from url,
+    * @param {String} url The url for the epub file.
+    * @param {Function} callback The callback that is executed once the epub file has been retrieved.
+    */
+
     function getBinaryFile(url, callback) {
         var request = useMSXHR() ? new ActiveXObject("Msxml2.XmlHttp.6.0")
-    			: new XMLHttpRequest();
-		request.onreadystatechange = function() {
-			if (request.readyState == 1) {
-				if (request.overrideMimeType) {
-					request
-							.overrideMimeType('text/plain; charset=x-user-defined');
-				}
-				request.send();
-			}
+            : new XMLHttpRequest();
+        request.onreadystatechange = function() {
+            if (request.readyState == 1) {
+                if (request.overrideMimeType) {
+                    request
+                        .overrideMimeType('text/plain; charset=x-user-defined');
+                }
+                request.send();
+            }
 
-			if (request.readyState == 4) {
-				if (request.status == 200) {
-					var data;
-					if (useMSXHR()) {
-						var data = new VBArray(request.responseBody).toArray();
-						for ( var j = 0; j < data.length; ++j)
-							data[j] = String.fromCharCode(data[j]);
-						callback(data.join(''));
-						request.abort();
-					} else {
-						callback(request.responseText);
-					}
-				} else {
-					console.log('Failed to get file ' + url + '<br>');
-				}
-			}
-		};
-		request.open("GET", url, true);
-	}
-    
-    /**
-     * Retrieves the epub file from url, then begins the process of parsing it by retrievig the container.xml file.
-     * @param {data} data contained inside the epub file.
-     */
-    function unzipBlob(data) {
-        //try{
-            publish(EVENT.LOADING, STATE.OK,MSG.UNZIPPING);
-            _unzipper = new JSZip();
-            _unzipper.load(data, {
-                base64 : false
-            });
-            
-            console.log(_unzipper);
-            console.log(_unzipper.files, typeof(_unzipper.files));
-            
-            _compressedFiles=[];
-            for(var key in _unzipper.files){
-                var item = _unzipper.files[key];
-                if(item){
-                    _compressedFiles.push(item);
+            if (request.readyState == 4) {
+                if (request.status == 200) {
+                    var data;
+                    if (useMSXHR()) {
+                        var data = new VBArray(request.responseBody).toArray();
+                        for (var j = 0; j < data.length; ++j)
+                            data[j] = String.fromCharCode(data[j]);
+                        callback(data.join(''));
+                        request.abort();
+                    } else {
+                        callback(request.responseText);
+                    }
+                } else {
+                    console.log('Failed to get file ' + url + '<br>');
                 }
             }
-            
-            uncompressNextCompressedFile();
-            
-        //}
-        //catch(ex){
-            //console.log(ex);
-            publish(EVENT.LOADING, STATE.ERR,MSG.ERR_NOT_ZIP);
-        //}
-	}
-    
+        };
+        request.open("GET", url, true);
+    }
+
+    /**
+    * Retrieves the epub file from url, then begins the process of parsing it by retrievig the container.xml file.
+    * @param {data} data contained inside the epub file.
+    */
+
+    function unzipBlob(data) {
+        //try{
+        publish(EVENT.LOADING, STATE.OK, MSG.UNZIPPING);
+        _unzipper = new JSZip();
+        _unzipper.load(data, {
+            base64: false
+        });
+
+        console.log(_unzipper);
+        console.log(_unzipper.files, typeof(_unzipper.files));
+
+        _compressedFiles = [];
+        for (var key in _unzipper.files) {
+            var item = _unzipper.files[key];
+            if (item) {
+                _compressedFiles.push(item);
+            }
+        }
+        try{
+        uncompressNextCompressedFile();
+
+        }
+        catch(ex){
+        //console.log(ex);
+            publish(EVENT.LOADING, STATE.ERR, MSG.ERR_NOT_ZIP);
+        }
+    }
+
     function uncompressNextCompressedFile() {
         var compressedFile = _compressedFiles.shift();
         if (compressedFile) {
@@ -141,28 +148,29 @@ QT.bookdata = (function(qt){
             didUncompressAllFiles();
         }
     }
-        
+
     // For mockability
+
     function withTimeout(func) {
         var self = this;
-        setTimeout(function () {
+        setTimeout(function() {
             func.call(self);
         }, 30);
     }
 
     function didUncompressAllFiles() {
-            publish(EVENT.LOADING, STATE.OK, MSG.READING_OPF);
-            _opfPath = getOpfPathFromContainer();
-            
-            // Get the OEPBS dir, if there is one
-            if (_opfPath.indexOf('/') != -1) {
-                _oebpsDir =  _opfPath.substr(0, _opfPath.lastIndexOf('/'));
-            }
-            
-            readOpf(_files[_opfPath]);
+        publish(EVENT.LOADING, STATE.OK, MSG.READING_OPF);
+        _opfPath = getOpfPathFromContainer();
 
-            publish(EVENT.LOADING, STATE.OK, MSG.POST_PROCESSING);
-            postProcess();
+        // Get the OEPBS dir, if there is one
+        if (_opfPath.indexOf('/') != -1) {
+            _oebpsDir = _opfPath.substr(0, _opfPath.lastIndexOf('/'));
+        }
+
+        readOpf(_files[_opfPath]);
+
+        publish(EVENT.LOADING, STATE.OK, MSG.POST_PROCESSING);
+        postProcess();
     }
 
     function uncompressFile(compressedFile) {
@@ -176,8 +184,8 @@ QT.bookdata = (function(qt){
             _files[compressedFile.name] = data;
         }
     }
-    
-    
+
+
     function getOpfPathFromContainer() {
         var doc = xmlDocument(_container);
         return doc
@@ -187,17 +195,16 @@ QT.bookdata = (function(qt){
 
     function readOpf(xml) {
         var doc = xmlDocument(xml);
-            
+
         var opf = {
-            metadata: {},
-            manifest: {},
+            metadata: { },
+            manifest: { },
             spine: []
         };
 
         //Get the epub version from the package tag. 
         _epubVersion = parseInt(doc.getElementsByTagName("package")[0].getAttribute("version"), 10);
         
-
 
         var metadataNodes = doc
             .getElementsByTagName("metadata")[0]
@@ -207,10 +214,10 @@ QT.bookdata = (function(qt){
             var node = metadataNodes[i];
             // Skip text nodes (whitespace)
             if ((node.nodeType === 3) || (node.nodeType == 8)) { 
-                continue; 
+                continue;
             }
 
-            var attrs = {};
+            var attrs = { };
             for (var i2 = 0, il2 = node.attributes.length; i2 < il2; i2++) {
                 var attr = node.attributes[i2];
                 attrs[attr.name] = attr.value;
@@ -222,23 +229,23 @@ QT.bookdata = (function(qt){
         var manifestEntries = doc
             .getElementsByTagName("manifest")[0]
             .getElementsByTagName("item");
-        
+
         var ncxFile = '';
         for (var i = 0, il = manifestEntries.length; i < il; i++) {
             var node = manifestEntries[i];
             var id = node.getAttribute("id");
-            var href= node.getAttribute("href");
-            
+            var href = node.getAttribute("href");
+
             if (href.indexOf('.ncx') != -1) 
             {
-                _tocType = TOCTYPE.XML
-				ncxFile = href;
+                _tocType = TOCTYPE.XML;
+    			ncxFile = href;
 			}
             else if(id.toLowerCase() === 'toc' || id.toLowerCase() === 'nav'){
                 _tocType = TOCTYPE.XHTML;
                 ncxFile = href;
             }
-            
+
             opf.manifest[id] = {
                 "href": resolvePath(node.getAttribute("href"), _opfPath),
                 "media-type": node.getAttribute("media-type")
@@ -255,127 +262,109 @@ QT.bookdata = (function(qt){
         }
 
         _opf = opf;
-        
-        if(ncxFile){
-            // resolve the absolute path for the ncxFile
+        if (ncxFile) {
+			// resolve the absolute path for the ncxFile
             _ncxPath = resolvePath(ncxFile, _opfPath);
             _ncx = readNcx(_files[_ncxPath]);
         }
-        
-        
+
     }
-    
-    function readNcx(xml){
+
+    function readNcx(xml) {
         var doc = xmlDocument(xml);
-        console.log(doc, "toc")
+
         var tocItems = [];
-        
-        
+
 
         // ePub 3 compatibility to parse toc.xhtml file
         if (_tocType == TOCTYPE.XHTML) {
-            
+
             var navTopLevelEntries = doc
-            .getElementsByTagName("nav");
-            console.log(navTopLevelEntries)
+                .getElementsByTagName("nav");
+
+            console.log(navTopLevelEntries);
             for (var i = 0, il = navTopLevelEntries.length; i < il; i++) {
                 var node = navTopLevelEntries[i];
                 if(node.getAttributeNS("http://www.idpf.org/2007/ops","type") != "toc" ){
                     continue;
                 }
-                
-                
+
+
                 var olElement = node.firstElementChild;
-                
-                for(var ii = 0, iil = olElement.childNodes.length; ii < iil; ii++) {
+
+                for (var ii = 0, iil = olElement.childNodes.length; ii < iil; ii++) {
                     var liElement = olElement.childNodes[ii];
-                    if(liElement.nodeName.toLowerCase() != "li"){
+                    if (liElement.nodeName.toLowerCase() != "li") {
                         continue;
                     }
-                    if(liElement){
-                        tocItems.push(recursive3NcxParser(liElement));
-                    }
-                    
+                    tocItems.push(recursive3NcxParser(liElement));
                 }
-                
-//                if(oebps_dir){
-//                    link = oebps_dir + '/' + $(this).find(content_tag).attr('src');
-//            	}
-//				else{
-//					link = $(this).find(content_tag).attr('src');
-//				}
             }
-            
+
         }
-        // ePub 2 compatibility to parse toc.ncx file
-        //if (_epubVersion === 2) {
-        else{
-        
-//            // Some ebooks use navPoint while others use ns:navPoint tags
-//            var nav_tag = 'ns\\:navPoint';
-//            var content_tag = 'ns\\:content';
-//            var text_tag = 'ns\\:text';
-//		
-//            if ($(f).find('ns\\:navPoint').length == 0) {
-//                nav_tag = 'navPoint';
-//                content_tag = 'content';
-//                text_tag = 'text';
-//            }
+            // ePub 2 compatibility to parse toc.ncx file
+            //if (_epubVersion === 2) {
+        else {
+
+            //            // Some ebooks use navPoint while others use ns:navPoint tags
+            //            var nav_tag = 'ns\\:navPoint';
+            //            var content_tag = 'ns\\:content';
+            //            var text_tag = 'ns\\:text';
+            //		
+            //            if ($(f).find('ns\\:navPoint').length == 0) {
+            //                nav_tag = 'navPoint';
+            //                content_tag = 'content';
+            //                text_tag = 'text';
+            //            }
             var navPointTopLevelEntries = doc
-            .getElementsByTagName("navMap")[0]
-            .childNodes;
-		
-            
+                .getElementsByTagName("navMap")[0]
+                .childNodes;
+
+
             for (var i = 0, il = navPointTopLevelEntries.length; i < il; i++) {
                 var node = navPointTopLevelEntries[i];
-                if(node.nodeName.toLowerCase() != "navpoint"){
+                if (node.nodeName.toLowerCase() != "navpoint") {
                     continue;
                 }
-                
+
                 tocItems.push(recursive2NcxParser(node));
-                
-                
-//                if(oebps_dir){
-//                    link = oebps_dir + '/' + $(this).find(content_tag).attr('src');
-//        		}
-//				else{
-//					link = $(this).find(content_tag).attr('src');
-//				}
             }
-             
+
         }
         return tocItems;
     }
-    
-    function recursive2NcxParser(navPointElement){
+
+    function recursive2NcxParser(navPointElement) {
         var navPointChildren = navPointElement.childNodes;
-        
-        
-        
+
+
         var link = resolvePath(navPointElement.getElementsByTagName("content")[0].getAttribute("src"), _opfPath);
         var title = navPointElement.getElementsByTagName("navLabel")[0].getElementsByTagName("text")[0].textContent;
-        
-        var tocItem = new TocItem(title,link);
-        
+
+        var tocItem = new TocItem(title, link);
+
         for (var i = 0, il = navPointChildren.length; i < il; i++) {
             var childNavPoint = navPointChildren[i];
-            if(childNavPoint.nodeName.toLowerCase() == "navpoint"){
+            if (childNavPoint.nodeName.toLowerCase() == "navpoint") {
                 tocItem.children.push(recursive2NcxParser(childNavPoint));
             }
         }
         return tocItem;
     }
-    
+
     function recursive3NcxParser(liElement){
         var liChildren = liElement.childNodes;
+
         
         var tocItem = new TocItem('placeholder title','');
         for (var i = 0, il = liChildren.length; i < il; i++) {
             var childElement = liChildren[i];
             if(childElement.nodeName.toLowerCase() == "a" || childElement.nodeName.toLowerCase() == "span"){
+
                 
                 var link = resolvePath(childElement.getAttribute("href"), _ncxPath);
                 var title = childElement.value? childElement.value : childElement.text;
+
                 
                 tocItem.title =title;
                 tocItem.src = link;
@@ -391,18 +380,20 @@ QT.bookdata = (function(qt){
                 }
             }
         }
+
         
         return tocItem;
+
         
     }
-    
-    
-    function TocItem(title, src){
+
+
+    function TocItem(title, src) {
         this.title = title;
         this.src = src;
         this.children = [];
     }
-    
+
     function resolvePath(path, referrerLocation) {
         var pathDirs = path.split("/");
         var fileName = pathDirs.pop();
@@ -432,15 +423,16 @@ QT.bookdata = (function(qt){
         }
 
         // Best guess if it's not in the manifest. (Those bastards.)
-        var match = href.match(/\.(\w+)$/);
+        var match = href.match( /\.(\w+)$/ );
         return match && "image/" + match[1];
     }
 
-        // Will modify all HTML and CSS files in place.
+    // Will modify all HTML and CSS files in place.
+
     function postProcess() {
         for (var key in _opf.manifest) {
-            var mediaType = _opf.manifest[key]["media-type"]
-            var href = _opf.manifest[key]["href"]
+            var mediaType = _opf.manifest[key]["media-type"];
+            var href = _opf.manifest[key]["href"];
             var result = '';
 
             if (mediaType === "text/css") {
@@ -453,16 +445,16 @@ QT.bookdata = (function(qt){
                 _files[href] = result;
             }
         }
-        publish(EVENT.BOOKDATA_READY, STATE.OK,MSG.INIT_EBOOK_READER);
+        publish(EVENT.BOOKDATA_READY, STATE.OK, MSG.INIT_EBOOK_READER);
     }
-    
-    
+
+
     function postProcessCSS(href) {
         var file = _files[href];
         var self = this;
 
-        file = file.replace(/url\((.*?)\)/gi, function (str, url) {
-            if (/^data/i.test(url)) {
+        file = file.replace( /url\((.*?)\)/gi , function(str, url) {
+            if ( /^data/i .test(url)) {
                 // Don't replace data strings
                 return str;
             } else {
@@ -482,33 +474,33 @@ QT.bookdata = (function(qt){
         for (var i = 0, il = images.length; i < il; i++) {
             var image = images[i];
             var src = image.getAttribute("src");
-            if (/^data/.test(src)) { 
+            if ( /^data/ .test(src)) {
                 continue;
             }
             image.setAttribute("src", getDataUri(src, href));
         }
-        
+
         var svgImages = doc.getElementsByTagName("image");
         for (var i = 0, il = svgImages.length; i < il; i++) {
             var image = svgImages[i];
-            var src = (image.getAttribute("href") ? image.getAttribute("href") : image.getAttributeNS("http://www.w3.org/1999/xlink","href"));
-            if(!src){
+            var src = (image.getAttribute("href") ? image.getAttribute("href") : image.getAttributeNS("http://www.w3.org/1999/xlink", "href"));
+            if (!src) {
                 continue;
             }
-            if (/^data/.test(src)) { 
+            if ( /^data/ .test(src)) {
                 continue;
             }
             //create a newnode.
-            var newImgNode= doc.createElement("img");
+            var newImgNode = doc.createElement("img");
             newImgNode.setAttribute("src", getDataUri(src, href));
             newImgNode.height = image.height;
             newImgNode.width = image.width;
-            
+
             //replace node.
             image.parentNode.replaceChild(newImgNode, image);
-            
+
         }
-        
+
 
         var head = doc.getElementsByTagName("head")[0];
         var links = head.getElementsByTagName("link");
@@ -538,7 +530,7 @@ QT.bookdata = (function(qt){
 
     function validate() {
         if (_container === undefined) {
-               throw new Error("META-INF/container.xml file not found.");
+            throw new Error("META-INF/container.xml file not found.");
         }
 
         if (_mimetype === undefined) {
@@ -550,7 +542,8 @@ QT.bookdata = (function(qt){
         }
     }
 
-        // for data URIs
+    // for data URIs
+
     function escapeData(data) {
         return escape(data);
     }
@@ -564,109 +557,105 @@ QT.bookdata = (function(qt){
 
         return doc;
     }
-    
-    
+
+
     //////////////////////////////////////////////////////////////////////////
     // Public Methods
     //////////////////////////////////////////////////////////////////////////
-    var init = function(url, options){
-        
-        if(url){
-            publish(EVENT.LOADING, STATE.OK,MSG.LOADING_FILE);
-            getBinaryFile(url,unzipBlob);
-            
-        }
-        else{
+    var init = function(url, options) {
+
+        if (url) {
+            publish(EVENT.LOADING, STATE.OK, MSG.LOADING_FILE);
+            getBinaryFile(url, unzipBlob);
+
+        } else {
             publish(EVENT.LOADING, STATE.ERR, MSG.ERR_BLANK_URL);
         }
-        
-        
+
+
     };
-    
+
     //////////////////////////////////////////////////////////////////////////
     // Messaging Methods
     //////////////////////////////////////////////////////////////////////////
-    
-    function publish(event, state, message){
+
+    function publish(event, state, message) {
         $.publish(event, [state, message]);
     }
-    
-    
-    
+
+
     //////////////////////////////////////////////////////////////////////////
     // Monocle Book Data Interface Methods 
     // https://github.com/joseph/Monocle/wiki/Book-data-object
     //////////////////////////////////////////////////////////////////////////
-    
-    var getComponents = function () {
-        
+
+    var getComponents = function() {
+
         var componentArr = [];
-        for(var key in _opf.spine){
+        for (var key in _opf.spine) {
             var spineEntry = _opf.spine[key];
             componentArr.push(_opf.manifest[spineEntry].href);
         }
-        
-        console.log('getComponents',componentArr);
+
+        console.log('getComponents', componentArr);
         return componentArr;
     };
-    var getContents = function () {
-        console.log('getContents',_ncx);
-       return _ncx;
+    var getContents = function() {
+        console.log('getContents', _ncx);
+        return _ncx;
     };
-    var getComponent = function (componentId, callback) {
+    var getComponent = function(componentId, callback) {
         //todo: decide if it would be better/faster to unzip the file on demand. for now just display the unzipped file.
-        console.log('getComponent',componentId,_files[componentId].documentElement.outerHTML);
-        
-        
+        console.log('getComponent', componentId, _files[componentId].documentElement.outerHTML);
+
+
         return _files[componentId].documentElement.outerHTML;
     };
     var getMetaData = function(key) {
         switch (key) {
-            case "title":
-                try{
-                    return _opf.metadata['dc:title']._text;
-                }
-                catch(ex){
-                    return '';
-                }
-                break;
-            case "creator":
-                try{
-                    return _opf.metadata['dc:creator']._text;
-                }
-                catch(ex){
-                    return '';
-                }
-                break;
+        case "title":
+            try {
+                return _opf.metadata['dc:title']._text;
+            } catch(ex) {
+                return '';
+            }
+            break;
+        case "creator":
+            try {
+                return _opf.metadata['dc:creator']._text;
+            } catch(ex) {
+                return '';
+            }
+            break;
         }
         return '';
-            
+
     };
-    
+
     return {
-        init :  init,
-        events : function(){return EVENT;},
-        
-        unzipper:           function(){return _unzipper;},
-        compressedFiles:    function(){return _compressedFiles;},
-        files:              function(){return _files;},
-        opfPath:            function(){return _opfPath;},
-        container:          function(){return _container;},
-        mimetype:           function(){return _mimetype;},
-        opf:                function(){return _opf;},
-        ncx:                function(){return _ncx;},
-        oebpsDir:           function(){return _oebpsDir;},
-        ncxPath:            function(){return _ncxPath;},
-        publish:    publish,
-        
+        init: init,
+        events: function() { return EVENT; },
+
+        unzipper: function() { return _unzipper; },
+        compressedFiles: function() { return _compressedFiles; },
+        files: function() { return _files; },
+        opfPath: function() { return _opfPath; },
+        container: function() { return _container; },
+        mimetype: function() { return _mimetype; },
+        opf: function() { return _opf; },
+        ncx: function() { return _ncx; },
+        oebpsDir: function() { return _oebpsDir; },
+		ncxPath:            function(){return _ncxPath;},
+        publish: publish,
+
         /*Monocle Book Data Interface Methods*/
-        getComponents : getComponents,
-        getContents : getContents,
-        getComponent : getComponent,
-        getMetaData : getMetaData
+        getComponents: getComponents,
+        getContents: getContents,
+        getComponent: getComponent,
+        getMetaData: getMetaData
     };
-        
-    
-})(QT)
+
+
+})(QT);
 
 
