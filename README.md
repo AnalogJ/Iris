@@ -1,4 +1,4 @@
-behold
+Iris
 ======
 
-behold epub + mobi viewer, monocle + js-epub 
+iris epub + mobi viewer, monocle + js-epub 
